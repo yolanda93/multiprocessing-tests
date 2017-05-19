@@ -1,6 +1,7 @@
 import multiprocessing
+import unittest
 
-class Test_bounding(object):
+class BoundingMethods(object):
 
    def method_bound(self):
        print(self)
@@ -8,7 +9,7 @@ class Test_bounding(object):
 
    @staticmethod
    def method_unbound():
-       print Test_bounding
+       print BoundingMethods
 
    @staticmethod
    def method_unbound2():
@@ -24,33 +25,45 @@ def get_text(name):
    return "Test using decorators, it is called from: {0}".format(name)
 
 
-def A(B):
-    B("x")
-    pass
-    #return Test_bounding.method_unbound2()
+def warping_function():
+    return get_text('Parent')
 
-def B():
-    print "bbb"
 
-print "a"
+def warping_function(funct):
+    return funct()
+
+class TestBounding(unittest.TestCase):
+
+    def test_method_bound(self):
+         test = BoundingMethods()
+         self.assertRaises(TypeError, multiprocessing.Process(target=test.method_bound).start())
+
+    def test_method_unbound(self):
+        test = BoundingMethods()
+        self.assertRaises(TypeError, multiprocessing.Process(target=test.method_unbound).start())
+
+
+class TestDecorators(unittest.TestCase):
+
+    def test_parent(self):
+        self.assertRaises(TypeError,get_text("Parent"))
+
+    def test_child(self):
+        self.assertRaises(TypeError, multiprocessing.Process(target=get_text, args=("Child",)).start())
+
+    def test_child_encapsulated(self):
+        self.assertRaises(TypeError, multiprocessing.Process(target=warping_function).start())
+
+    def test_child_encapsulated_arg(self):
+        self.assertRaises(TypeError, multiprocessing.Process(target=warping_function, args=(get_text,)).start())
 
 
 if __name__ == '__main__':
 
     ###################### Unbound and bound methods
-
-   # Works.
-   #test1 = Test_bounding()
-   #test1.method_bound()
-   #multiprocessing.Process(target=test1.method_bound).start()
-   # Fails.
-   #multiprocessing.Process(target=test1.method_unbound).start()
-   #multiprocessing.Process(target=Test_bounding.method_unbound).start()
-   multiprocessing.Process(target=A, args=(get_text,)).start()
+    print('Unbound and bound methods')
+    unittest.TextTestRunner().run(unittest.TestLoader().loadTestsFromTestCase(TestBounding))
 
     ######################  Using decorators
-
-   # Works.
-   #print get_text("Parent")
-   # Fails.
-   #multiprocessing.Process(target=get_text, args=("Child",)).start()
+    print('Decorators')
+    unittest.TextTestRunner().run(unittest.TestLoader().loadTestsFromTestCase(TestDecorators))
