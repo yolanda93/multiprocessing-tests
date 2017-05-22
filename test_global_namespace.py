@@ -14,6 +14,7 @@ class A(object):
                  'c':0 }
 
 def func():
+    print "func",__name__
     mock_module.value_mock = 1
     a = A()
     return a
@@ -24,6 +25,8 @@ def func1(a):
     print mock_module.value_mock
 
 c = 2
+print  __name__
+
 if __name__ == '__main__':
     a = func()
     p = Process(target=func1, args=(a,))
