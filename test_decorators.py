@@ -13,7 +13,7 @@ class BoundingMethods(object):
 
    @staticmethod
    def method_unbound2():
-      print get_text("x")
+       print get_text("x")
 
 def deco(func):
    def func_wrapper(name):
