@@ -20,6 +20,7 @@ class _ProcessPool_(unittest.TestCase):
 
 def add_worker(funct,name=None):
     _ProcessPool_.workers.append(funct)
+    return funct
 
 def func_wrapper(funct):
     return funct()
