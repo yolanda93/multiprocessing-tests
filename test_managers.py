@@ -1,4 +1,4 @@
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Queue
 
 # Expected result: threads modify locally ns and then the local results are joined together
 # Actual result:  The ns object remains inmutable
@@ -7,7 +7,7 @@ def test_sharedObject(ns):
     ns.ls.append(4)
 
 
-# Expected result: threads modified locally ns and then the local result are joined together
+# Expected result: threads modify locally ns and then the local result are joined together
 # Actual result: there concurrency problems 
 def test_inNamespace(ns):
     ns.x += 1
@@ -22,6 +22,11 @@ def test_inNamespace(ns):
     tmp.append(8)
     ns.ls = tmp
 
+# Expected result: threads modify locally out_q and the local result is merger in the main process
+# Actual result:  This test works fine
+
+def test_Queue(out_q):
+    out_q.put(1)
 
 if __name__ == '__main__':
     manager = Manager()
@@ -30,7 +35,7 @@ if __name__ == '__main__':
     ns.y = [1]
     ns.ls = manager.list([1, 1, 1])
 
-    """Single process example"""
+    print """ Test 1 FAILED - Single process example"""
 
     print 'before', ns.ls, ns.x, ns.y
     p = Process(target=test_inNamespace, args=(ns,))
@@ -38,7 +43,7 @@ if __name__ == '__main__':
     p.join()
     print 'after',  ns.ls, ns.x, ns.y
 
-    """Multiple process example"""
+    print """ Test 2 FAILED - Namespace - Multiple process example"""
 
     n=10
     ns.x = 1
@@ -51,4 +56,23 @@ if __name__ == '__main__':
     for each in p:
         each.join()
 
-print 'after', ns.ls, ns.x, ns.y
+    print 'after', ns.ls, ns.x, ns.y
+
+    print """ Test 3 PASSED - Queue - Multiple process example"""
+
+    n=10
+    out_q = Queue()
+    result = []
+    print 'before', result
+    p = [Process(target=test_Queue, args=(out_q,)) for i in range(n -1)]
+
+    for each in p:
+        each.start()
+
+    for i in p:
+       result.append(out_q.get())
+
+    for each in p:
+        each.join()
+
+    print 'after', result
