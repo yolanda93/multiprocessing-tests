@@ -1,12 +1,14 @@
 from multiprocessing import Process, Manager, freeze_support
 
-
+# Expected result: threads modified locally ns and then the local results are joined together
+# Actual result:  The ns object remains inmutable
 def test_sharedObject(ns):
-    ns.x += 1
     ns.y.append(2)
     ns.ls.append(4)
 
 
+# Expected result: threads modified locally ns and then the local result are joined together
+# Actual result: there concurrency problems 
 def test_inNamespace(ns):
     ns.x += 1
     ns.ls.append(8)
@@ -49,4 +51,4 @@ if __name__ == '__main__':
     for each in p:
         each.join()
 
-    print 'after',  ns.ls, ns.x, ns.y
+print 'after', ns.ls, ns.x, ns.y
