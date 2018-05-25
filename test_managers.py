@@ -1,6 +1,6 @@
-from multiprocessing import Process, Manager, freeze_support
+from multiprocessing import Process, Manager
 
-# Expected result: threads modified locally ns and then the local results are joined together
+# Expected result: threads modify locally ns and then the local results are joined together
 # Actual result:  The ns object remains inmutable
 def test_sharedObject(ns):
     ns.y.append(2)
